@@ -45,7 +45,7 @@ Installation
 Clone the repository:
 
 bash
-git clone https://github.com/YOUR_USERNAME/help-a-prisoner.git
+git clone https://github.com/Ebeli1/help-a-prisoner.git
 cd help-a-prisoner/mobile
 Install dependencies:
 
