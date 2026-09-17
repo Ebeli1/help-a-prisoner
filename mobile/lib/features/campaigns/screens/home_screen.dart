@@ -46,9 +46,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Container(
                   height: 40,
                   width: 40,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFFD4AF37),
+                    color: Color(0xFFD4AF37),
                   ),
                   child: const Icon(
                     Icons.handshake,
@@ -160,11 +160,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 _buildImpactSection(),
                 const SizedBox(height: 40),
 
-                // --- ADDED: Golden Heart Foundation Logo ---
+                // --- Golden Heart Foundation Logo ---
                 _buildGoldenHeartLogo(),
                 const SizedBox(height: 20),
 
-                // --- ADDED: Powered by Dominion City Prison Ministry ---
+                // --- Powered by Dominion City Prison Ministry ---
                 _buildPoweredBySection(),
                 const SizedBox(height: 40),
               ]),
@@ -175,7 +175,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // --- NEW WIDGET: Golden Heart Foundation Logo ---
+  // --- Golden Heart Foundation Logo ---
   Widget _buildGoldenHeartLogo() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
@@ -202,17 +202,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           const SizedBox(height: 16),
+          // Make sure this file exists in your assets/logos folder
           Image.asset(
             'assets/logos/Golden_Heart_logo.jpg',
             height: 120,
             fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(Icons.broken_image,
+                  size: 80, color: Colors.grey);
+            },
           ),
         ],
       ),
     );
   }
 
-  // --- NEW WIDGET: Powered by Dominion City ---
+  // --- Powered by Dominion City Prison Ministry ---
   Widget _buildPoweredBySection() {
     return Column(
       children: [
@@ -229,10 +234,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             const SizedBox(width: 12),
+            // Make sure this file exists in your assets/logos folder
             Image.asset(
               'assets/logos/Dc_Prison_Min_logo.png',
               height: 70,
               fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.broken_image,
+                    size: 50, color: Colors.grey);
+              },
             ),
           ],
         ),
