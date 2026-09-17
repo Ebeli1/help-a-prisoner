@@ -334,3 +334,94 @@ export const mockOrganizationDetails: Record<string, OrganizationDetails> = {
     ],
   },
 };
+
+// ==========================================
+// SECTION 7: Donations List
+// ==========================================
+export type DonationStatus = 'SUCCESSFUL' | 'PENDING' | 'FAILED' | 'REFUNDED' | 'REVERSED';
+export type PaymentProvider = 'PAYSTACK' | 'FLUTTERWAVE' | 'BANK_TRANSFER';
+
+export interface Donation {
+  id: string;
+  amount: number;
+  campaign: string;
+  campaignId: string;
+  organization: string;
+  donor: string;
+  donorEmail: string;
+  paymentProvider: PaymentProvider;
+  transactionReference: string;
+  date: string;
+  status: DonationStatus;
+}
+
+export const mockDonations: Donation[] = [
+  { id: 'DNT-10001', amount: 50000, campaign: 'Digital Skills Training Centre', campaignId: 'CMP-001', organization: 'Dominion City Prisons Ministry', donor: 'Adebayo Ogunlesi', donorEmail: 'adebayo@example.com', paymentProvider: 'PAYSTACK', transactionReference: 'PSK_9F8E7D6C5B', date: '2026-09-15 14:32', status: 'SUCCESSFUL' },
+  { id: 'DNT-10002', amount: 100000, campaign: 'Digital Skills Training Centre', campaignId: 'CMP-001', organization: 'Dominion City Prisons Ministry', donor: 'Anonymous', donorEmail: 'hidden@anon.io', paymentProvider: 'PAYSTACK', transactionReference: 'PSK_1A2B3C4D5E', date: '2026-09-15 12:15', status: 'SUCCESSFUL' },
+  { id: 'DNT-10003', amount: 25000, campaign: 'Prison Library Restoration', campaignId: 'CMP-002', organization: 'Golden Heart Foundation', donor: 'Chioma Eze', donorEmail: 'chioma@example.com', paymentProvider: 'FLUTTERWAVE', transactionReference: 'FLW_7Z8Y9X0W1V', date: '2026-09-14 18:45', status: 'SUCCESSFUL' },
+  { id: 'DNT-10004', amount: 500000, campaign: 'Prison Library Restoration', campaignId: 'CMP-002', organization: 'Golden Heart Foundation', donor: 'Emeka Nwosu', donorEmail: 'emeka.n@example.com', paymentProvider: 'BANK_TRANSFER', transactionReference: 'BNK_5G4H3J2K1L', date: '2026-09-14 10:20', status: 'SUCCESSFUL' },
+  { id: 'DNT-10005', amount: 10000, campaign: 'Vocational Training Equipment', campaignId: 'CMP-003', organization: 'Discipleship Leadership Institution', donor: 'Anonymous', donorEmail: 'hidden@anon.io', paymentProvider: 'PAYSTACK', transactionReference: 'PSK_8M7N6P5Q4R', date: '2026-09-13 16:55', status: 'PENDING' },
+  { id: 'DNT-10006', amount: 75000, campaign: 'Vocational Training Equipment', campaignId: 'CMP-003', organization: 'Discipleship Leadership Institution', donor: 'Folake Adeyemi', donorEmail: 'folake@example.com', paymentProvider: 'PAYSTACK', transactionReference: 'PSK_2T3U4V5W6X', date: '2026-09-13 11:30', status: 'SUCCESSFUL' },
+  { id: 'DNT-10007', amount: 200000, campaign: 'Digital Skills Training Centre', campaignId: 'CMP-001', organization: 'Dominion City Prisons Ministry', donor: 'Ibrahim Musa', donorEmail: 'ibrahim@example.com', paymentProvider: 'FLUTTERWAVE', transactionReference: 'FLW_9Y8Z7A6B5C', date: '2026-09-12 09:15', status: 'SUCCESSFUL' },
+  { id: 'DNT-10008', amount: 15000, campaign: 'Prison Library Restoration', campaignId: 'CMP-002', organization: 'Golden Heart Foundation', donor: 'Grace Okonkwo', donorEmail: 'grace@example.com', paymentProvider: 'PAYSTACK', transactionReference: 'PSK_4D3E2F1G0H', date: '2026-09-11 20:00', status: 'FAILED' },
+  { id: 'DNT-10009', amount: 300000, campaign: 'Digital Skills Training Centre', campaignId: 'CMP-001', organization: 'Dominion City Prisons Ministry', donor: 'Tunde Bakare', donorEmail: 'tunde@example.com', paymentProvider: 'BANK_TRANSFER', transactionReference: 'BNK_1I2J3K4L5M', date: '2026-09-10 14:00', status: 'SUCCESSFUL' },
+  { id: 'DNT-10010', amount: 40000, campaign: 'Vocational Training Equipment', campaignId: 'CMP-003', organization: 'Discipleship Leadership Institution', donor: 'Ngozi Okafor', donorEmail: 'ngozi@example.com', paymentProvider: 'PAYSTACK', transactionReference: 'PSK_6N5O4P3Q2R', date: '2026-09-09 08:45', status: 'REFUNDED' },
+  { id: 'DNT-10011', amount: 120000, campaign: 'Digital Skills Training Centre', campaignId: 'CMP-001', organization: 'Dominion City Prisons Ministry', donor: 'Kemi Adesanya', donorEmail: 'kemi@example.com', paymentProvider: 'FLUTTERWAVE', transactionReference: 'FLW_8S7T6U5V4W', date: '2026-09-08 19:30', status: 'SUCCESSFUL' },
+  { id: 'DNT-10012', amount: 60000, campaign: 'Prison Library Restoration', campaignId: 'CMP-002', organization: 'Golden Heart Foundation', donor: 'Anonymous', donorEmail: 'hidden@anon.io', paymentProvider: 'PAYSTACK', transactionReference: 'PSK_3X2Y1Z0A9B', date: '2026-09-08 13:20', status: 'REVERSED' },
+];
+
+// ==========================================
+// SECTION 8: Full Donation Details
+// ==========================================
+export interface DonationCorrection {
+  id: string;
+  type: 'REFUND' | 'REVERSAL' | 'CORRECTION';
+  amount: number;
+  reason: string;
+  date: string;
+  actor: string;
+}
+
+export interface DonationDetails extends Donation {
+  donorPhone?: string;
+  donorNote?: string;
+  corrections: DonationCorrection[];
+  auditTrail: {
+    date: string;
+    actor: string;
+    action: string;
+    note?: string;
+  }[];
+}
+
+export const mockDonationDetails: Record<string, DonationDetails> = {
+  'DNT-10010': {
+    id: 'DNT-10010',
+    amount: 40000,
+    campaign: 'Vocational Training Equipment',
+    campaignId: 'CMP-003',
+    organization: 'Discipleship Leadership Institution',
+    donor: 'Ngozi Okafor',
+    donorEmail: 'ngozi@example.com',
+    donorPhone: '+234 809 123 4567',
+    donorNote: 'Keep up the great work!',
+    paymentProvider: 'PAYSTACK',
+    transactionReference: 'PSK_6N5O4P3Q2R',
+    date: '2026-09-09 08:45',
+    status: 'REFUNDED',
+    corrections: [
+      {
+        id: 'COR-001',
+        type: 'REFUND',
+        amount: 40000,
+        reason: 'Donor requested refund within 24-hour window.',
+        date: '2026-09-09 12:30',
+        actor: 'Admin User',
+      },
+    ],
+    auditTrail: [
+      { date: '2026-09-09 08:45', actor: 'System', action: 'DONATION_RECEIVED', note: 'Paystack webhook confirmed.' },
+      { date: '2026-09-09 12:30', actor: 'Admin User', action: 'REFUND_ISSUED', note: 'Refund processed via Paystack.' },
+    ],
+  },
+};
