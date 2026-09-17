@@ -1,0 +1,17 @@
+{
+  "buildCommand": "export PATH=\"$PATH:$HOME/flutter/bin\" && cd mobile && flutter build web --release",
+  "outputDirectory": "mobile/build/web",
+  "installCommand": "git clone https://github.com/flutter/flutter.git --depth 1 -b stable $HOME/flutter && export PATH=\"$PATH:$HOME/flutter/bin\" && flutter --version",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Embedder-Policy", "value": "credentialless" }
+      ]
+    }
+  ]
+}
