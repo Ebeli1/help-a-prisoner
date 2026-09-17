@@ -1,7 +1,7 @@
 {
-  "buildCommand": "export PATH=\"$PATH:$HOME/flutter/bin\" && cd mobile && flutter build web --release",
+  "installCommand": "git clone https://github.com/flutter/flutter.git --depth 1 -b stable $HOME/flutter",
+  "buildCommand": "export PATH=\"$PATH:$HOME/flutter/bin\" && ls -la && cd mobile && flutter build web --release",
   "outputDirectory": "mobile/build/web",
-  "installCommand": "git clone https://github.com/flutter/flutter.git --depth 1 -b stable $HOME/flutter && export PATH=\"$PATH:$HOME/flutter/bin\" && flutter --version",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ],
