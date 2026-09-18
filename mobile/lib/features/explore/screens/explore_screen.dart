@@ -4,6 +4,13 @@ import '../../campaigns/models/campaign.dart';
 import '../../campaigns/widgets/campaign_card.dart';
 import '../../campaigns/screens/campaign_details_screen.dart';
 
+class _Palette {
+  static const navy = Color(0xFF0D1B2A);
+  static const gold = Color(0xFFD4AF37);
+  static const bg = Color(0xFFF7F8FA);
+  static const surface = Color(0xFFFDFBF6);
+}
+
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
 
@@ -13,11 +20,12 @@ class ExploreScreen extends ConsumerStatefulWidget {
 
 class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   String _selectedCategory = 'All';
   String _selectedStatus = 'All';
   List<Campaign> _filteredCampaigns = [];
+  bool _hasQuery = false;
 
-  // Sample categories
   final List<String> _categories = [
     'All',
     'Welfare',
@@ -35,25 +43,39 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     'Completed',
   ];
 
-  // Sample campaigns (in real app, this would come from an API)
   final List<Campaign> _allCampaigns = Campaign.getSampleCampaigns();
 
   @override
   void initState() {
     super.initState();
     _filteredCampaigns = _allCampaigns;
+    _searchController.addListener(() {
+      final hasQuery = _searchController.text.isNotEmpty;
+      if (hasQuery != _hasQuery) setState(() => _hasQuery = hasQuery);
+    });
+    _searchFocusNode.addListener(() => setState(() {}));
   }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
+  bool get _hasActiveFilters =>
+      _selectedCategory != 'All' ||
+      _selectedStatus != 'All' ||
+      _searchController.text.isNotEmpty;
 
   void _applyFilters() {
     setState(() {
       _filteredCampaigns = _allCampaigns.where((campaign) {
-        // Category filter
         if (_selectedCategory != 'All' &&
             campaign.category != _selectedCategory) {
           return false;
         }
 
-        // Status filter
         if (_selectedStatus != 'All') {
           final statusMap = {
             'Active': 'active',
@@ -65,7 +87,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
           }
         }
 
-        // Search filter
         if (_searchController.text.isNotEmpty) {
           final query = _searchController.text.toLowerCase();
           return campaign.title.toLowerCase().contains(query) ||
@@ -78,198 +99,33 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     });
   }
 
+  void _clearAllFilters() {
+    _searchController.clear();
+    setState(() {
+      _selectedCategory = 'All';
+      _selectedStatus = 'All';
+    });
+    _applyFilters();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'Explore',
-          style: TextStyle(
-            fontFamily: 'Georgia',
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF0D1B2A),
-        elevation: 0,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (_) => _applyFilters(),
-                decoration: InputDecoration(
-                  hintText: 'Search campaigns, projects...',
-                  hintStyle: TextStyle(
-                    color: Colors.grey[500],
-                    fontFamily: 'Georgia',
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: Colors.grey[500],
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: Icon(Icons.clear, color: Colors.grey[500]),
-                          onPressed: () {
-                            _searchController.clear();
-                            _applyFilters();
-                          },
-                        )
-                      : null,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+      backgroundColor: _Palette.bg,
+      appBar: _buildAppBar(),
       body: Column(
         children: [
-          // Filters
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Category filter
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      ..._categories.map((category) {
-                        final isSelected = _selectedCategory == category;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: FilterChip(
-                            label: Text(
-                              category,
-                              style: TextStyle(
-                                fontFamily: 'Georgia',
-                                fontSize: 13,
-                                color: isSelected
-                                    ? Colors.white
-                                    : const Color(0xFF0D1B2A),
-                              ),
-                            ),
-                            selected: isSelected,
-                            onSelected: (selected) {
-                              setState(() {
-                                _selectedCategory = category;
-                                _applyFilters();
-                              });
-                            },
-                            backgroundColor: Colors.grey[200],
-                            selectedColor: const Color(0xFFD4AF37),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 4,
-                            ),
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Status filter
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      ..._statuses.map((status) {
-                        final isSelected = _selectedStatus == status;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: FilterChip(
-                            label: Text(
-                              status,
-                              style: TextStyle(
-                                fontFamily: 'Georgia',
-                                fontSize: 13,
-                                color: isSelected
-                                    ? Colors.white
-                                    : const Color(0xFF0D1B2A),
-                              ),
-                            ),
-                            selected: isSelected,
-                            onSelected: (selected) {
-                              setState(() {
-                                _selectedStatus = status;
-                                _applyFilters();
-                              });
-                            },
-                            backgroundColor: Colors.grey[200],
-                            selectedColor: const Color(0xFF0D1B2A),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 4,
-                            ),
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Results count
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${_filteredCampaigns.length} campaigns found',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                    fontFamily: 'Georgia',
-                  ),
-                ),
-                if (_filteredCampaigns.length != _allCampaigns.length)
-                  TextButton(
-                    onPressed: () {
-                      _searchController.clear();
-                      _selectedCategory = 'All';
-                      _selectedStatus = 'All';
-                      _applyFilters();
-                    },
-                    child: const Text(
-                      'Clear Filters',
-                      style: TextStyle(
-                        color: Color(0xFFD4AF37),
-                        fontFamily: 'Georgia',
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Results
+          _buildFilterSection(),
+          _buildResultsHeader(),
+          const SizedBox(height: 4),
           Expanded(
             child: _filteredCampaigns.isEmpty
                 ? _buildEmptyState()
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                : ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                     itemCount: _filteredCampaigns.length,
+                    separatorBuilder: (context, _) =>
+                        const SizedBox(height: 14),
                     itemBuilder: (context, index) {
                       final campaign = _filteredCampaigns[index];
                       return CampaignCard(
@@ -293,6 +149,235 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     );
   }
 
+  // ---------------------------------------------------------------------
+  // App bar with embedded search field
+  // ---------------------------------------------------------------------
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: const Text(
+        'Explore',
+        style: TextStyle(
+          fontFamily: 'Georgia',
+          fontWeight: FontWeight.bold,
+          color: _Palette.navy,
+        ),
+      ),
+      centerTitle: false,
+      backgroundColor: _Palette.surface,
+      surfaceTintColor: Colors.transparent,
+      foregroundColor: _Palette.navy,
+      elevation: 0,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(72),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: _searchFocusNode.hasFocus
+                    ? _Palette.gold.withValues(alpha: 0.6)
+                    : Colors.grey.withValues(alpha: 0.15),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: TextField(
+              controller: _searchController,
+              focusNode: _searchFocusNode,
+              onChanged: (_) => _applyFilters(),
+              style: const TextStyle(fontFamily: 'Georgia', fontSize: 14.5),
+              decoration: InputDecoration(
+                hintText: 'Search campaigns, projects...',
+                hintStyle: TextStyle(
+                  color: Colors.grey[500],
+                  fontFamily: 'Georgia',
+                  fontSize: 14.5,
+                ),
+                prefixIcon: const Icon(
+                  Icons.search_rounded,
+                  color: _Palette.gold,
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                suffixIcon: _hasQuery
+                    ? IconButton(
+                        icon: Icon(Icons.close_rounded,
+                            color: Colors.grey[500], size: 20),
+                        onPressed: () {
+                          _searchController.clear();
+                          _applyFilters();
+                        },
+                      )
+                    : null,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------
+  // Filter chips
+  // ---------------------------------------------------------------------
+  Widget _buildFilterSection() {
+    return Container(
+      color: _Palette.surface,
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildChipRow(
+            options: _categories,
+            selected: _selectedCategory,
+            selectedColor: _Palette.gold,
+            selectedTextColor: _Palette.navy,
+            onSelected: (value) {
+              setState(() => _selectedCategory = value);
+              _applyFilters();
+            },
+          ),
+          const SizedBox(height: 8),
+          _buildChipRow(
+            options: _statuses,
+            selected: _selectedStatus,
+            selectedColor: _Palette.navy,
+            selectedTextColor: Colors.white,
+            onSelected: (value) {
+              setState(() => _selectedStatus = value);
+              _applyFilters();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChipRow({
+    required List<String> options,
+    required String selected,
+    required Color selectedColor,
+    required Color selectedTextColor,
+    required ValueChanged<String> onSelected,
+  }) {
+    return SizedBox(
+      height: 36,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: options.length,
+        separatorBuilder: (context, _) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final option = options[index];
+          final isSelected = selected == option;
+          return GestureDetector(
+            onTap: () => onSelected(option),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOut,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: isSelected ? selectedColor : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected
+                      ? Colors.transparent
+                      : Colors.grey.withValues(alpha: 0.2),
+                ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: selectedColor.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                    : null,
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                option,
+                style: TextStyle(
+                  fontFamily: 'Georgia',
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected ? selectedTextColor : _Palette.navy,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------
+  // Results header
+  // ---------------------------------------------------------------------
+  Widget _buildResultsHeader() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Text(
+                '${_filteredCampaigns.length}',
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: _Palette.navy,
+                  fontFamily: 'Georgia',
+                ),
+              ),
+              Text(
+                ' campaigns found',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                  fontFamily: 'Georgia',
+                ),
+              ),
+            ],
+          ),
+          if (_hasActiveFilters)
+            GestureDetector(
+              onTap: _clearAllFilters,
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.filter_alt_off_rounded,
+                      size: 15, color: _Palette.gold),
+                  SizedBox(width: 4),
+                  Text(
+                    'Clear Filters',
+                    style: TextStyle(
+                      color: _Palette.gold,
+                      fontFamily: 'Georgia',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------
+  // Empty state
+  // ---------------------------------------------------------------------
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
@@ -300,45 +385,50 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 60,
-              color: Colors.grey[400],
+            Container(
+              height: 96,
+              width: 96,
+              decoration: BoxDecoration(
+                color: _Palette.navy.withValues(alpha: 0.05),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.search_off_rounded,
+                size: 42,
+                color: _Palette.navy,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             const Text(
               'No campaigns found',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 19,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Georgia',
-                color: Color(0xFF0D1B2A),
+                color: _Palette.navy,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Try adjusting your filters or search terms',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 14.5,
                 color: Colors.grey[600],
                 fontFamily: 'Georgia',
+                height: 1.4,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () {
-                _searchController.clear();
-                _selectedCategory = 'All';
-                _selectedStatus = 'All';
-                _applyFilters();
-              },
+              onPressed: _clearAllFilters,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFD4AF37),
-                foregroundColor: const Color(0xFF0D1B2A),
+                backgroundColor: _Palette.gold,
+                foregroundColor: _Palette.navy,
+                elevation: 0,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 12,
+                  horizontal: 28,
+                  vertical: 13,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
@@ -347,7 +437,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
               child: const Text(
                 'Clear Filters',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Georgia',
                 ),
